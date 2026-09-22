@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://deepshield-api.onrender.com/api/:path*"
+      "destination": "https://deepshield-64ic.onrender.com/api/:path*"
     }
   ]
 }
