@@ -17,7 +17,7 @@ try:
     import mediapipe as mp
     _mp_face_mesh = mp.solutions.face_mesh
     MEDIAPIPE_AVAILABLE = True
-except ImportError:
+except Exception:
     MEDIAPIPE_AVAILABLE = False
 
 # Eye landmarks for EAR (Eye Aspect Ratio) computation

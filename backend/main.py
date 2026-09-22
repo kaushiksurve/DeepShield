@@ -3,7 +3,6 @@ DeepShield — FastAPI Backend
 Multi-Layer Deepfake & Identity Verification System
 Hackathon Prototype — Team AI Warriors
 """
-import asyncio
 import os
 import time
 import uuid
@@ -12,7 +11,6 @@ from pathlib import Path
 import aiofiles
 from fastapi import FastAPI, File, HTTPException, UploadFile, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 from config import settings, PROTOTYPE_NOTE, DEMO_NOTE
 from database import init_db, create_analysis, update_analysis, get_analysis, list_analyses
@@ -69,25 +67,34 @@ async def health():
 # Analysis
 # ─────────────────────────────────────────────
 
+def _safe_module(fn, *args, name="module") -> dict:
+    """Run a module safely — returns neutral score on any exception."""
+    try:
+        return fn(*args)
+    except Exception as e:
+        return {
+            "score": 50.0, "confidence": 0.1, "risk": "medium",
+            "evidence": [f"{name} encountered an error: {str(e)[:120]}"],
+            "timestamps": [],
+        }
+
+
 async def _run_analysis(analysis_id: str, video_path: str, filename: str):
     """Run the full analysis pipeline in background."""
     audio_path = None
     try:
         start_time = time.time()
-        
-        # Get video metadata
+
         meta = get_video_metadata(video_path)
-        
-        # Extract audio
         audio_path = extract_audio(video_path)
-        
-        # Run all modules
-        face_result = analyze_face(video_path)
-        audio_result = analyze_audio(audio_path, meta.get("duration", 0))
-        lipsync_result = analyze_lipsync(video_path, audio_path, meta.get("fps", 25.0))
-        temporal_result = analyze_temporal(video_path)
-        liveness_result = analyze_liveness(video_path)
-        behavior_result = analyze_behavior(video_path)
+
+        # Run all modules with per-module error isolation
+        face_result     = _safe_module(analyze_face,     video_path,                          name="Face")
+        audio_result    = _safe_module(analyze_audio,    audio_path, meta.get("duration", 0), name="Audio")
+        lipsync_result  = _safe_module(analyze_lipsync,  video_path, audio_path, meta.get("fps", 25.0), name="LipSync")
+        temporal_result = _safe_module(analyze_temporal, video_path,                          name="Temporal")
+        liveness_result = _safe_module(analyze_liveness, video_path,                          name="Liveness")
+        behavior_result = _safe_module(analyze_behavior, video_path,                          name="Behavior")
         
         module_results = {
             "face": face_result,

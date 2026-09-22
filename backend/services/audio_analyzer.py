@@ -16,7 +16,7 @@ from config import PROTOTYPE_NOTE
 try:
     import librosa
     LIBROSA_AVAILABLE = True
-except ImportError:
+except Exception:
     LIBROSA_AVAILABLE = False
 
 

@@ -18,13 +18,13 @@ try:
     import cv2
     _mp_face_mesh = mp.solutions.face_mesh
     MEDIAPIPE_AVAILABLE = True
-except ImportError:
+except Exception:
     MEDIAPIPE_AVAILABLE = False
 
 try:
     import librosa
     LIBROSA_AVAILABLE = True
-except ImportError:
+except Exception:
     LIBROSA_AVAILABLE = False
 
 # Upper/lower lip landmark indices for mouth aperture
@@ -55,18 +55,19 @@ def _xcorr(a, b, max_lag):
 
 
 def _extract_mouth_aperture(video_path: str, fps: float, sample_rate: int = 5) -> list[float]:
-    """Extract per-frame mouth aperture from video."""
+    """Extract per-frame mouth aperture from video (capped at 200 samples)."""
     if not MEDIAPIPE_AVAILABLE:
         return []
-    
+
     import cv2
     cap = cv2.VideoCapture(video_path)
     face_mesh = _mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1,
                                         min_detection_confidence=0.5)
     apertures = []
     frame_idx = 0
+    MAX_SAMPLES = 200
     try:
-        while True:
+        while len(apertures) < MAX_SAMPLES:
             ret, frame = cap.read()
             if not ret:
                 break
@@ -87,7 +88,7 @@ def _extract_mouth_aperture(video_path: str, fps: float, sample_rate: int = 5) -
     finally:
         cap.release()
         face_mesh.close()
-    
+
     return apertures
 
 

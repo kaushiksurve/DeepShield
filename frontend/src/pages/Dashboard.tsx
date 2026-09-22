@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Shield, Zap, Lock, Eye } from 'lucide-react';
 import { VideoUploader } from '../components/VideoUploader';
 import { AnalysisPipeline } from '../components/AnalysisPipeline';
@@ -13,11 +13,9 @@ const MODULE_ORDER = ['face', 'audio', 'lipsync', 'temporal', 'liveness', 'behav
 
 export function Dashboard() {
   const { steps, isAnalyzing, result, error, analyzeVideo, loadDemoResult, reset } = useAnalysis();
-  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const handleSeek = (time: number) => {
-    // For demo results there's no real video, but for real results the user has their video
-    // We can't seek an uploaded video after analysis without re-storing it, so we skip
+  const handleSeek = (_time: number) => {
+    // Timeline seek: no video element available post-analysis
   };
 
   return (

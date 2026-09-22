@@ -3,11 +3,15 @@ services:
     name: deepshield-api
     runtime: python
     rootDir: backend
-    buildCommand: "apt-get install -y libgl1-mesa-glx libglib2.0-0 2>/dev/null || true && pip install -r requirements.txt"
+    buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
       - key: MAX_UPLOAD_MB
         value: "100"
+      - key: NUMBA_DISABLE_JIT
+        value: "1"
+      - key: NUMBA_CACHE_DIR
+        value: "/tmp/numba_cache"
     plan: free
