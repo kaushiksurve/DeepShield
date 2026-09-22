@@ -12,10 +12,11 @@ class Settings(BaseSettings):
     max_upload_mb: int = 100
     allowed_extensions: list = [".mp4", ".mov", ".webm", ".avi"]
     allowed_mimetypes: list = ["video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/avi"]
-    frame_sample_rate: int = 10  # process every Nth frame
+    frame_sample_rate: int = 30  # process every Nth frame (higher = faster, less accurate)
+    max_frames: int = 40          # hard cap on frames analysed per video
     temp_dir: str = "temp_uploads"
     db_path: str = "deepshield.db"
-    cors_origins: list = ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"]
+    cors_origins: list = ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "*"]
     
     # Fusion weights (must sum to 1.0)
     fusion_weights: Dict[str, float] = {

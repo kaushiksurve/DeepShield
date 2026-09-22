@@ -8,30 +8,40 @@ from config import settings
 
 def extract_frames(video_path: str, sample_rate: int = None) -> list[np.ndarray]:
     """
-    Extract frames from video at given sample rate.
+    Extract frames from video at given sample rate, capped at max_frames.
+    Resizes frames to max 640px wide to reduce CPU load.
     Returns list of BGR numpy arrays.
     """
     if sample_rate is None:
         sample_rate = settings.frame_sample_rate
-    
+
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         raise ValueError(f"Cannot open video: {video_path}")
-    
+
     frames = []
     frame_idx = 0
+    max_frames = getattr(settings, 'max_frames', 40)
     try:
         while True:
             ret, frame = cap.read()
             if not ret:
                 break
             if frame_idx % sample_rate == 0:
+                # Resize to max 640px wide to reduce MediaPipe CPU load
+                h, w = frame.shape[:2]
+                if w > 640:
+                    scale = 640 / w
+                    frame = cv2.resize(frame, (640, int(h * scale)))
                 frames.append(frame)
+                if len(frames) >= max_frames:
+                    break
             frame_idx += 1
     finally:
         cap.release()
-    
+
     return frames
+
 
 def get_video_metadata(video_path: str) -> dict:
     """Extract video metadata: fps, frame count, duration, width, height."""

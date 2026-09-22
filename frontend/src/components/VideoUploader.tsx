@@ -15,6 +15,7 @@ export function VideoUploader({ onAnalyze, isAnalyzing, disabled }: Props) {
   const [duration, setDuration] = useState<number>(0);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [videoError, setVideoError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -23,6 +24,7 @@ export function VideoUploader({ onAnalyze, isAnalyzing, disabled }: Props) {
 
   const handleFile = useCallback((f: File) => {
     setError(null);
+    setVideoError(false);
     if (!ALLOWED.includes(f.type) && !f.name.match(/\.(mp4|mov|webm|avi)$/i)) {
       setError('Unsupported format. Please upload MP4, MOV, WEBM, or AVI.');
       return;
@@ -94,13 +96,24 @@ export function VideoUploader({ onAnalyze, isAnalyzing, disabled }: Props) {
         <div className="glass rounded-2xl overflow-hidden">
           {/* Video Preview */}
           <div className="relative bg-black aspect-video">
-            <video
-              ref={videoRef}
-              src={previewUrl || ''}
-              className="w-full h-full object-contain"
-              controls
-              onLoadedMetadata={e => setDuration((e.target as HTMLVideoElement).duration)}
-            />
+            {videoError ? (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-slate-400">
+                <Film size={40} className="text-violet-400/60" />
+                <div className="text-center">
+                  <p className="text-sm font-medium text-slate-300">{file.name}</p>
+                  <p className="text-xs text-slate-500 mt-1">Preview not supported in browser — file is ready to analyze</p>
+                </div>
+              </div>
+            ) : (
+              <video
+                ref={videoRef}
+                src={previewUrl || ''}
+                className="w-full h-full object-contain"
+                controls
+                onLoadedMetadata={e => setDuration((e.target as HTMLVideoElement).duration)}
+                onError={() => setVideoError(true)}
+              />
+            )}
             <button
               onClick={clear}
               className="absolute top-2 right-2 w-8 h-8 bg-black/60 backdrop-blur rounded-full flex items-center justify-center hover:bg-red-500/50 transition-colors"
