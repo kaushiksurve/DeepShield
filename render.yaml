@@ -2,12 +2,12 @@ services:
   - type: web
     name: deepshield-api
     runtime: python
-    region: singapore       # closest to India
-    plan: free
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    buildCommand: "apt-get install -y libgl1-mesa-glx libglib2.0-0 2>/dev/null || true && pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
-    healthCheckPath: /api/health
+      - key: MAX_UPLOAD_MB
+        value: "100"
+    plan: free
