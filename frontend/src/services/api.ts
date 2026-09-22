@@ -1,14 +1,12 @@
 import axios from 'axios';
 import type { AnalysisResult } from '../types/analysis';
 
-// In production (Vercel), VITE_API_URL points to the Render backend.
-// In development, the Vite proxy forwards /api → localhost:8000.
-const API_BASE = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL}/api`
-  : '/api';
+// Call Render backend directly — Vercel's proxy corrupts multipart file uploads.
+// CORS is open on the backend (allow_origins=["*"]).
+const RENDER_URL = 'https://deepshield-64ic.onrender.com';
 
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: `${RENDER_URL}/api`,
   timeout: 300_000, // 5 minutes for large videos
 });
 
