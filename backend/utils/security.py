@@ -12,19 +12,17 @@ def sanitize_filename(filename: str) -> str:
     return name[:128]
 
 def validate_video_file(file: UploadFile, content: bytes) -> None:
-    """Validate file extension, MIME type, and size. Raises HTTPException on failure."""
+    """Validate file extension and size. Raises HTTPException on failure."""
     if not file.filename:
         raise HTTPException(400, "No filename provided")
-    
+
     ext = Path(file.filename).suffix.lower()
     if ext not in settings.allowed_extensions:
         raise HTTPException(400, f"File type '{ext}' not supported. Allowed: {settings.allowed_extensions}")
-    
-    content_type = file.content_type or ""
-    # Be lenient — browsers sometimes report generic content type
-    if content_type and content_type not in settings.allowed_mimetypes and content_type != "application/octet-stream":
-        raise HTTPException(400, f"MIME type '{content_type}' not accepted")
-    
+
+    # Skip strict MIME check — browsers/proxies send inconsistent content-types
+    # Trust the file extension instead.
+
     size_mb = len(content) / (1024 * 1024)
     if size_mb > settings.max_upload_mb:
         raise HTTPException(413, f"File too large ({size_mb:.1f} MB). Maximum is {settings.max_upload_mb} MB")
