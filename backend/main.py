@@ -59,7 +59,8 @@ async def health():
     return {
         "status": "ok",
         "service": "DeepShield Analysis Engine",
-        "version": "1.0.0",
+        "version": "1.0.3",
+        "build": "cors-fixed",
         "note": PROTOTYPE_NOTE,
     }
 
